@@ -1,0 +1,143 @@
+There are two types of rendering environment :
+
+1.Client side Rendering: 
+->Components are rendered at the clients browser 
+-> We have to bundle all of our components and send it to client for rendering as our app grows larger the bundle and needed larger memory on client side .
+-> SEO bot that browses and index our website cannot view our components as it cannot execute js code due to which it is not possible to search engine optimize website rendered in client side
+-> sensitive datas like API key etc can get exposed to the client side
+
+
+1.server side Rendering: 
+->Components are rendered at the server side so smaller bundles are sent to the client 
+->so it is resources efficient
+-> as the components are rendered at the server and the content of it is sent to the clients side so, SEO bot can view and index our data 
+->> more secure to keep secret data like api
+
+
+cons of server side rendering :
+-> we cannot do interactivity like:
+1.cannot listen to browser events
+2. cannot access browser APIs
+3. cannot Maintain state
+3. cannot useEffects 
+
+
+<-----Data fetching------>
+
+1. Fetching on the client
+
+----> useState() + useEffect()
+
+whenever a data is fetched in the client side then client will render the components and fetches the data from the server and then fills the component with data and renders it in client side which is causing an extra round trip to the server and may expose the sensitive data to the client 
+
+
+so, whenever possible we should fetch data in the server components 
+2. Fetching on the server 
+
+
+
+********Caching********
+-> caching is a technique to store frequently accessed data in a temporary storage , file system or network etc. area so that it can be accessed faster
+
+  const res = await fetch("https://jsonplaceholder.typicode.com/users", {
+    //If data is frequently changing then set cache: "no-store",
+    //To keep data fresh for certain amount of time set
+
+    //Data caching is possible in the fetch() only and is not available in the third party fetch package like axios
+    next: { revalidate: 10 },
+  });
+
+
+
+<-------Query strings----->
+
+if the folder /user contains page.tsx so that it can be accessed with the link : http://localhost:3000/users
+
+We can pass the data through the url which is called as query string . for e.g: http://localhost:3000/users?sortOrder=id  
+
+->sortOrder is a query string with the value='id'
+
+and in order to get access of this query string we can do like using searchParams as :
+
+interface Props {
+  searchParams: { sortOrder: string };
+}
+
+const UserPage = async ({ searchParams: { sortOrder } }: Props) => {
+  return ( );
+}
+
+now we can pass this searchParams to the components inside the /users folder as Props :
+
+const UserPage = async ({ searchParams: { sortOrder } }: Props) => {
+  return (
+    <>
+      //passing the query string as props to UserTable component as 
+      <UserTable sortOrder={sortOrder} />
+    </>
+  );
+};
+
+
+<-------Handling not found pages---->
+
+If we create 'not-found.tsx' in the root of app folder then it will be shown for any unaccessible pages in the root app directory 
+
+If we want to show the Error pages with different Error message than that of not-found.tsx in root folder of app we can create not-found.tsx inside the specific component folder . 
+for e.g: 
+if we want to display "User doesn't exist' error page when user tries to access the url : localhos://users/12 then we can create not-fount.tsx inside the app/users folder 
+
+and to access this error pages in other component we can simply use : notFound();
+
+notFound(); should be imported as : 
+import { useRouter, notFound } from "next/navigation";
+
+
+
+<-------Validation-------->
+
+
+export async function DELETE(request: NextRequest, { params: { id } }: Props) {
+  const body = await request.json();
+
+  if (!body.name) {
+    return NextResponse.json({ error: "Name is required" }, { status: 402 });
+  }
+
+  if (id > 10) {
+    return NextResponse.json(
+      { error: "User with that id doesn't exists" },
+      { status: 402 }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      message: `Object with the following ${id} is Deleted`,
+    },
+    { status: 200 }
+  );
+}
+
+
+if the body object has few number of properties then we can validate mannually like above but if there are number of data properties to be validated then we need Library to validate it .
+
+
+
+<------Prisma------>
+It is an ORM( Object Relational Mapper) for Node.js and typescript 
+
+-> to connect with the database we need to search for : prisma connection string 
+Then, 
+
+we specify the provider in the datasource 
+
+
+-> To sync the database schema with the prisma schema 
+
+command : npx prisma migrate dev
+
+we need to run same command if we change any schema model in the prisma to migrate the schema and sync with the database
+
+
+<-----Creating Prisma Client ----->
