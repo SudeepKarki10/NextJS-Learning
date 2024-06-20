@@ -141,3 +141,32 @@ we need to run same command if we change any schema model in the prisma to migra
 
 
 <-----Creating Prisma Client ----->
+Why Use a Singleton Pattern for Prisma Client in Next.js?
+->Database Connection Efficiency:
+Creating a new instance of Prisma Client for every request can be resource-intensive and slow down your application. By using a singleton pattern (like your prismaClientSingleton function), you ensure there's only one instance of Prisma Client per server instance. This improves efficiency by reducing overhead from repeated connection setup and teardown.
+Context Management:
+
+->In server-side applications like Next.js API routes or serverless functions, managing database connections across different requests and server instances is critical. Singleton patterns help maintain a single point of access to the database connection throughout the application lifecycle.
+
+Memory Management:
+-> Keeping a single instance of Prisma Client helps in managing memory effectively. This is important in environments where memory allocation and deallocation impact overall application performance.
+
+Global Access:
+-> Declaring Prisma Client as a global variable (prismaGlobal in your example) ensures that it can be accessed consistently across different parts of your application without the need to pass it around explicitly.
+
+Performance:
+->By initializing Prisma Client once and reusing it, you reduce the latency associated with establishing new database connections for each request. This results in faster response times for your API endpoints.
+
+
+
+<------Cloudinary is a cloud services like Azure, Google storage etc.for storing data like images , videos etc ----->
+
+Go to ; next.Cloudinary 
+
+npm i next-cloudinary
+
+open .env file and place the url for the cloud_name like:
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="<Your Cloud Name>"
+
+
+To see the media uploaded we need to go to Assets-> media library 
