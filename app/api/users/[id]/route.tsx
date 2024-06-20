@@ -16,6 +16,36 @@ export async function GET(
   return NextResponse.json(user);
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    console.log("Request Body:", body);
+
+    const validation = schema.safeParse(body);
+    if (!validation.success) {
+      console.error("Validation Error:", validation.error.errors);
+      return NextResponse.json(validation.error.errors, { status: 400 });
+    }
+
+    const newUser = {
+      email: body.email,
+      name: body.name,
+    };
+
+    const createdUser = await prisma.user.create({
+      data: newUser,
+    });
+
+    return NextResponse.json(createdUser, { status: 201 }); // Created
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 interface Props {
   params: { id: number };
 }
