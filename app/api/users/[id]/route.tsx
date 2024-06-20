@@ -88,3 +88,24 @@ export async function PUT(
   //   );
   // }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(params.id) },
+  });
+
+  console.log(user);
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const deletedUser = await prisma.user.delete({
+    where: { id: user.id },
+  });
+
+  return NextResponse.json(deletedUser, { status: 200 });
+}
