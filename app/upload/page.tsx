@@ -12,10 +12,11 @@ const UploadPage = () => {
     <div>
       <CldUploadWidget
         uploadPreset="kmdnlwcs"
-        onUpload={(error, result, widget) => {
-          setResource(result?.info); // { public_id, secure_url, etc }
-          widget.close();
-        }}
+        // onUpload={(error, result, widget) => {
+        //   setResource(result?.info); // { public_id, secure_url, etc }
+        //   widget.close();
+        // }
+        //}
       >
         {({ open }) => {
           return (

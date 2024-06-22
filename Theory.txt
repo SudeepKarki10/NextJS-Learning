@@ -170,3 +170,92 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="<Your Cloud Name>"
 
 
 To see the media uploaded we need to go to Assets-> media library 
+
+
+<-------NEXTAUTH------------>
+NextAuth.js is a popular authentication library for Next.js applications. It provides a simple and flexible way to authenticate the routes to the users.
+
+firstly, 
+install next-auth as : npm i next-auth
+create a new file in pages/api/auth/[...nextauth].js
+import NextAuth from 'next-auth'
+import Google from 'next-auth/providers/google'
+set .env file with : NEXTAUTH_URL = http://localhost:3000
+                     NEXTAUTH_SECRET = asbfkjas$K@#JKJFSDBF$$&#7393
+
+
+now,
+in  api/auth/[...nextauth]/routes.tsx: 
+
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+
+const handler = NextAuth({
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+});
+export { handler as GET, handler as POST };
+
+NextAuth is a function from the NextAuth.js library that creates an authentication handler.
+GoogleProvider is a provider from NextAuth.js that enables authentication with Google OAuth.
+Inside NextAuth, you configure the authentication providers you want to use. In this case, it's using Google OAuth provider with the clientId and clientSecret fetched from environment variables (process.env.GOOGLE_CLIENT_ID and process.env.GOOGLE_CLIENT_SECRET).
+
+Exporting the Handler:
+export { handler as GET, handler as POST };
+
+This code exports the handler function as GET and POST.
+In Next.js API routes, depending on the HTTP method (GET, POST, etc.), different functions can handle the request. By exporting handler as GET and POST, Next.js understands that this single handler function will handle both GET and POST requests to the /api/auth/[...nextauth] endpoint.
+
+api/auth/[...nextauth] Endpoint:
+The api/auth/[...nextauth] endpoint is a dynamic API route provided by Next.js.
+The [...nextauth] part allows the route to match any paths starting with /api/auth/. This is particularly useful for handling various authentication-related requests, such as /api/auth/signin, /api/auth/signout, /api/auth/callback/[provider], etc.
+NextAuth.js uses this endpoint to manage authentication flows, such as initiating sign-in with Google, handling OAuth callbacks, and managing session cookies.
+
+
+Now, to provide session to all the component we have to :
+import { SessionProvider } from "next-auth/react";
+
+and wrap the children inside SessionProvider
+
+but it will throw error like : 
+Unhandled Runtime Error
+Error: React Context is unavailable in Server Components
+
+solution can be : simply using "use  client" to convert the component to clients component but it will throw another error :
+Error: 
+  × You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive.
+
+so, to solve this we have to create new folder in app/auth/Provider.tsx : 
+import React, { ReactNode } from "react";
+import { SessionProvider } from "next-auth/react";
+
+const AuthProvider = ({ children }: { children: ReactNode }) => {
+  return;
+  <SessionProvider>{children}</SessionProvider>;
+};
+
+export default AuthProvider;
+
+so the AuthProvider acts as the wrapper for SessionProvider
+
+
+
+<-----Accessing the session data in client---->
+import { useSession } from "next-auth/react";
+
+Distructuring the session data as :
+const { data: session, status } = useSession();
+
+status to check if it's in the loading state , authenticate or unauthenticated 
+
+for eg: if user is authenticate then displaying the username from the session data as :
+session.user.name
+
+This is an example of accessing session data in client .
+
+
+<-----Accessing data on Server ---------->
