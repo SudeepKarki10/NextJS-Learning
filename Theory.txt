@@ -177,12 +177,13 @@ NextAuth.js is a popular authentication library for Next.js applications. It pro
 
 firstly, 
 install next-auth as : npm i next-auth
-create a new file in pages/api/auth/[...nextauth].js
+create a new file in app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
-set .env file with : NEXTAUTH_URL = http://localhost:3000
-                     NEXTAUTH_SECRET = asbfkjas$K@#JKJFSDBF$$&#7393
-
+set .env file with :
+ NEXTAUTH_URL = http://localhost:3000
+ NEXTAUTH_SECRET = asbfkjas$K@#JKJFSDBF$$&#7393
+                   (Random junk of strings)
 
 now,
 in  api/auth/[...nextauth]/routes.tsx: 
@@ -219,7 +220,7 @@ NextAuth.js uses this endpoint to manage authentication flows, such as initiatin
 Now, to provide session to all the component we have to :
 import { SessionProvider } from "next-auth/react";
 
-and wrap the children inside SessionProvider
+and wrap the children inside SessionProvider in layout.tsx of root directory
 
 but it will throw error like : 
 Unhandled Runtime Error
@@ -235,7 +236,9 @@ import { SessionProvider } from "next-auth/react";
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   return;
-  <SessionProvider>{children}</SessionProvider>;
+  <SessionProvider>
+  {children}
+  </SessionProvider>;
 };
 
 export default AuthProvider;
@@ -259,3 +262,80 @@ This is an example of accessing session data in client .
 
 
 <-----Accessing data on Server ---------->
+To access the data on server we need to import getServerSession() from next-auth:
+
+ const session = await getServerSession(authOptions);
+
+here session is taken from the authOptions which contains the Google as provider. 
+
+which is in ./api/auth/[...nextauth]/route: 
+
+ export const authOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+};
+
+
+<-----Protecting the routes---->
+To protect the routes we can use the middleware function provided by next-auth which gets executed in every request:
+
+->In this function user sessions is checked.
+-> If user is trying to access the private part of the website without having a session then we redirect them to the login page.
+
+create middleware.tsx file in root directory:
+
+import middleware from "next-auth/middleware";
+
+export default middleware;
+
+export const config = {
+  //* : zero or more path after users along with users as well
+  //+ : one or more path after users along with users as well
+  //? : zero or one path after users along with users as well
+  matcher: ["/users/:id*"],
+};
+
+here, matcher contains the possible paths for which the redirect to the signup page is done.
+
+
+
+<------Prisma adapter--------->
+Prisma adapter is used to connect the next-auth with the prisma database.
+
+npm install @prisma/client @next-auth/prisma-adapter
+
+and in api/auth/[...nextauth]/route.tsx:
+
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export const authOptions = {
+  //add the adapter
+  adapter: PrismaAdapter(prisma),
+  providers :[
+
+  ]
+}
+
+Now if we try to login with google account we get errror : "Try with different Account "
+
+this is due to the fact that we haven't specified the session strategy. we can do it by:
+
+export const authOptions: NextAuthOptions = {
+  //add the adapter
+  adapter: PrismaAdapter(prisma),
+  providers :[
+
+  ],
+  session:{
+  strategy : 'jwt'
+  }
+}
+
+specify the type of authOptions : NextAuthOptions

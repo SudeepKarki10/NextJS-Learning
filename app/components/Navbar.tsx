@@ -10,9 +10,20 @@ const Navbar = () => {
       <h1>Next.js</h1>
       <Link href="/users/new"> User</Link>
       {status === "loading" && <div>Loading...</div>}
-      {status === "authenticated" && <div>{session.user!.name} </div>}
+      {status === "authenticated" && (
+        <div>
+          {session.user!.name}
+          <Link
+            href="api/auth/signout"
+            className="ml-4 text-blue-700 font-bold"
+          >
+            Sign out
+          </Link>
+        </div>
+      )}
       {status === "unauthenticated" && (
-        <Link href="/api/auth/signup">Signup</Link>
+        //api/auth/signin is the endpoint provided by the next-auth
+        <Link href="/api/auth/signin">Login</Link>
       )}
     </div>
   );

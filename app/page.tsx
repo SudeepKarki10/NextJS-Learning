@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
     <main>
-      <h1>Hello {session && <span>{session.user!.name}</span>}</h1>
+      <h1> {session && <span>Hello {session.user!.name}</span>}</h1>
       <Link href="/users">Users</Link>
       <ProductCard />
     </main>
